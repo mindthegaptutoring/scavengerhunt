@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pike Place Market Adventure Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2d7d7d 0%, #3f394e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #3f394e;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f7f5f3;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(63, 57, 78, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2d7d7d, #3f394e);
+            color: #f7f5f3;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: rgba(247, 245, 243, 0.3);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            background: #f7f5f3;
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .phase-title {
+            font-size: 1.4em;
+            color: #3f394e;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .riddle-box {
+            background: linear-gradient(135deg, #2d7d7d, #3f394e);
+            color: #f7f5f3;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            border: 3px solid #2d7d7d;
+        }
+
+        .riddle-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .navigation-section {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .found-button {
+            background: #2d7d7d;
+            color: #f7f5f3;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 125, 125, 0.4);
+        }
+
+        .found-button:hover {
+            background: #245e5e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 125, 125, 0.6);
+        }
+
+        .clue-section {
+            display: none;
+        }
+
+        .clue-box {
+            background: rgba(247, 245, 243, 0.7);
+            border-left: 5px solid #2d7d7d;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .clue-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .hints-section {
+            margin-bottom: 25px;
+        }
+
+        .hint-button {
+            background: #3f394e;
+            color: #f7f5f3;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .hint-button:hover {
+            background: #2d2938;
+            transform: translateY(-2px);
+        }
+
+        .hint-button:disabled {
+            background: #8a8691;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hint-display {
+            background: rgba(247, 245, 243, 0.9);
+            border: 1px solid #2d7d7d;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .answer-section {
+            margin-bottom: 25px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #2d7d7d;
+            border-radius: 8px;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            background: #f7f5f3;
+            color: #3f394e;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #3f394e;
+        }
+
+        .submit-button {
+            background: #2d7d7d;
+            color: #f7f5f3;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background: #245e5e;
+        }
+
+        .submit-button:disabled {
+            background: #8a8691;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .feedback.success {
+            background: rgba(45, 125, 125, 0.1);
+            border: 1px solid #2d7d7d;
+            color: #3f394e;
+        }
+
+        .feedback.error {
+            background: rgba(63, 57, 78, 0.1);
+            border: 1px solid #3f394e;
+            color: #3f394e;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(247, 245, 243, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #2d7d7d;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #3f394e;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #2d7d7d;
+        }
+
+        .next-location {
+            background: #2d7d7d;
+            color: #f7f5f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+
+        .completion-screen h2 {
+            color: #2d7d7d;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #3f394e;
+            margin: 20px 0;
+        }
+
+        .score-breakdown {
+            background: rgba(247, 245, 243, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #2d7d7d;
+        }
+
+        .problem-report {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(247, 245, 243, 0.8);
+            border-radius: 5px;
+            border: 1px solid #2d7d7d;
+        }
+
+        .report-button {
+            background: #3f394e;
+            color: #f7f5f3;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .reset-button {
+            background: #3f394e;
+            color: #f7f5f3;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐟 Pike Place Market Adventure Quest</h1>
+            <p>Challenge <span id="currentLocation">1</span> of <span id="totalLocations">14</span></p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalPoints">0</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="currentPoints">100</div>
+                    <div class="stat-label">Available Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="hintsUsed">0</div>
+                    <div class="stat-label">Total Hints Used</div>
+                </div>
+            </div>
+
+            <div class="phase-title" id="phaseTitle">
+                🧩 Find Your Destination
+            </div>
+
+            <div class="riddle-box">
+                <div class="riddle-text" id="riddleText">
+                    Welcome, adventurers! Your quest begins where fish fly and history was made. Seek the entrance where farmers first gathered in 1907. Look for the sign that welcomes all to this historic place.
+                </div>
+            </div>
+
+            <div class="navigation-section" id="navigationSection">
+                <p style="margin-bottom: 15px; color: #6c757d;">
+                    When you think you've found the right location, click the button below:
+                </p>
+                <button class="found-button" onclick="foundLocation()">
+                    📍 I Found It!
+                </button>
+            </div>
+
+            <div class="clue-section" id="clueSection">
+                <div class="clue-box">
+                    <div class="clue-text" id="clueText">
+                        Great job finding the main entrance to Pike Place Market! This historic marketplace has been serving Seattle for over a century. Look for the sign that displays when this amazing market was first founded.
+                    </div>
+                </div>
+
+                <div class="hints-section">
+                    <h3>Need a hint?</h3>
+                    <button class="hint-button" id="hint1Btn" onclick="showHint(1)">
+                        Hint 1 (-25 points)
+                    </button>
+                    <button class="hint-button" id="hint2Btn" onclick="showHint(2)" disabled>
+                        Hint 2 (-25 points)
+                    </button>
+                    <button class="hint-button" id="hint3Btn" onclick="showHint(3)" disabled>
+                        Hint 3 (-25 points)
+                    </button>
+
+                    <div class="hint-display" id="hint1"></div>
+                    <div class="hint-display" id="hint2"></div>
+                    <div class="hint-display" id="hint3"></div>
+                </div>
+
+                <div class="answer-section">
+                    <h3>Enter your answer:</h3>
+                    <input type="text" class="answer-input" id="answerInput" placeholder="Enter your answer here">
+                    <button class="submit-button" onclick="checkAnswer()">Submit Answer</button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <div class="next-location" id="nextLocation">
+                    <h3>🎉 Excellent work!</h3>
+                    <p id="pointsEarned"></p>
+                    <div id="nextRiddle"></div>
+                    <button class="submit-button" onclick="nextLocation()" style="margin-top: 15px;">Continue to Next Challenge</button>
+                </div>
+            </div>
+
+            <div class="completion-screen" id="completionScreen">
+                <h2>🏆 Quest Complete!</h2>
+                <p>Congratulations! You've successfully completed the Pike Place Market Adventure Quest!</p>
+                <div class="final-score" id="finalScore">0</div>
+                <p>Total Points Earned</p>
+                <div class="score-breakdown" id="scoreBreakdown"></div>
+                <button class="reset-button" onclick="resetGame()">Start New Quest</button>
+            </div>
+
+            <div class="problem-report">
+                <p>Can't find what you're looking for?</p>
+                <button class="report-button" onclick="reportProblem()">Report a Problem</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const locations = [
+            {
+                id: 1,
+                clue: "Great job finding the main entrance to Pike Place Market! This historic marketplace has been serving Seattle for over a century. Look for the sign that displays when this amazing market was first founded.",
+                answers: ['1907'],
+                hints: [
+                    "💡 Look for any signs or plaques that mention Pike Place Market's founding or establishment.",
+                    "💡 The Market has been operating for well over 100 years. The year starts with '19'.",
+                    "💡 Pike Place Market was founded in the same decade as the San Francisco earthquake. The year is 1907."
+                ],
+                riddle: "Welcome, adventurers! Your quest begins where fish fly and history was made. Seek the entrance where farmers first gathered in 1907. Look for the sign that welcomes all to this historic place.",
+                nextRiddle: "Well done! Now find the timekeeper that towers above - a beacon with numbers that watches the crowds below. This guardian of hours wasn't here when the market opened, but joined the party 30 years later."
+            },
+            {
+                id: 2,
+                clue: "Perfect! You've found the iconic clock and sign that towers over Pike Place Market! This landmark wasn't part of the original market - it was added later to help guide visitors. When was this famous timekeeper erected?",
+                answers: ['1937'],
+                hints: [
+                    "💡 Look for any plaques or information about when the clock and sign were installed.",
+                    "💡 This clock was added 30 years after the market opened. The market opened in 1907.",
+                    "💡 The clock was erected in the late 1930s, specifically in 1937."
+                ],
+                riddle: "Well done! Now find the timekeeper that towers above - a beacon with numbers that watches the crowds below. This guardian of hours wasn't here when the market opened, but joined the party 30 years later.",
+                nextRiddle: "Excellent! Time to meet a bronze friend who's been collecting coins for charity since the 80s. She's heavy, she's helpful, and she's named after a prize-winning farm animal. Look near where the fish vendors work their magic."
+            },
+            {
+                id: 3,
+                clue: "Fantastic! You've found Rachel the Piggy Bank! This beloved bronze pig has been collecting donations for local charities for decades. Look for the bronze plaque near Rachel that shows when she was installed at Pike Place Market.",
+                answers: ['august 17 1986', 'august 17, 1986', '8/17/1986', '8/17/86', 'august 17 86'],
+                hints: [
+                    "💡 Look around the base of Rachel for a bronze plaque with installation information.",
+                    "💡 The plaque mentions a gift from an ice cream company and includes a specific date in August.",
+                    "💡 Rachel was installed on August 17, 1986, as noted on the Fratelli's Ice Cream plaque."
+                ],
+                riddle: "Excellent! Time to meet a bronze friend who's been collecting coins for charity since the 80s. She's heavy, she's helpful, and she's named after a prize-winning farm animal. Look near where the fish vendors work their magic.",
+                nextRiddle: "Perfect! Now witness the famous flying seafood show! Find the vendors who turn fish-selling into performance art. Note the street names where this spectacle takes place."
+            },
+            {
+                id: 4,
+                clue: "Amazing! You've found the world-famous fish throwing vendors! This is where the legendary fish-flinging performance happens daily. Look around for street signs - what is the name of the main street where this market sits?",
+                answers: ['pike place', 'pike street', 'pike'],
+                hints: [
+                    "💡 Look at the street signs at the corners - this market sits at a major intersection.",
+                    "💡 The market's name gives you a big clue about what street it's on!",
+                    "💡 The market sits on Pike Place (and Pike Street at the intersection)."
+                ],
+                riddle: "Perfect! Now witness the famous flying seafood show! Find the vendors who turn fish-selling into performance art. Note the street names where this spectacle takes place.",
+                nextRiddle: "Fantastic! Head to the covered arcade where farmers sell their goods. Look for the historic divide - one side was for 'wet' produce, the other for 'dry'. What word describes the side closest to the street?"
+            },
+            {
+                id: 5,
+                clue: "Excellent! You're in the Main Arcade where farmers have sold goods for over a century! Historically, the market tables were divided into two sides - 'wet' for produce that needed washing, and 'dry' for items that didn't. Which side is closest to the street curb?",
+                answers: ['wet', 'wet side'],
+                hints: [
+                    "💡 Look at the market stalls and think about which side would need more cleanup after selling fresh produce.",
+                    "💡 The side closest to the street curb was for items that required daily washing down.",
+                    "💡 The 'wet' side is closest to the street curb, used for fresh produce that needed washing."
+                ],
+                riddle: "Fantastic! Head to the covered arcade where farmers sell their goods. Look for the historic divide - one side was for 'wet' produce, the other for 'dry'. What word describes the side closest to the street?",
+                nextRiddle: "Smart! Now find Seattle's most famous café that started a global empire. Look for the shop where the first beans were sold in the early 1970s - check the four digits on their door."
+            },
+            {
+                id: 6,
+                clue: "Excellent! You've discovered the Original Starbucks! This humble coffee shop started a global empire. While it's not the very first location, it's been here since the 1970s. What is the street address number displayed on the storefront?",
+                answers: ['1912'],
+                hints: [
+                    "💡 Look directly at the storefront for the building's address number.",
+                    "💡 The address is a four-digit number that starts with '19'.",
+                    "💡 The Original Starbucks is located at 1912 Pike Place."
+                ],
+                riddle: "Smart! Now find Seattle's most famous café that started a global empire. Look for the shop where the first beans were sold in the early 1970s - check the four digits on their door.",
+                nextRiddle: "Caffeinated and ready! Now seek the stickiest, most colorful wall in Seattle. Venture into the narrow passage where thousands have left their mark in the most unusual way. What's the name of this alley?"
+            },
+            {
+                id: 7,
+                clue: "Incredible! You've found Seattle's stickiest attraction! This brick wall is covered in decades of chewed gum from visitors around the world. You're standing in a narrow alley - what is the name of this famous passageway?",
+                answers: ['post alley'],
+                hints: [
+                    "💡 Look for street signs at either end of this narrow alley.",
+                    "💡 This alley name relates to mail delivery and has only two words.",
+                    "💡 You're standing in Post Alley, where the famous Gum Wall is located."
+                ],
+                riddle: "Caffeinated and ready! Now seek the stickiest, most colorful wall in Seattle. Venture into the narrow passage where thousands have left their mark in the most unusual way. What's the name of this alley?",
+                nextRiddle: "Gross but amazing! Head downstairs to find the large indoor atrium filled with artwork and sculptures. This open space below street level is perfect for your next discovery."
+            },
+            {
+                id: 8,
+                clue: "Wonderful! You've found the Economy Market atrium! This large indoor space showcases local art and has quite a history - it once housed a ballroom where people paid a dime to dance. Look up above the stairs for an original sign from that era. What type of entertainment venue does it advertise?",
+                answers: ['dance hall', 'dance', 'ballroom'],
+                hints: [
+                    "💡 Look up above the staircase area for vintage signage from the building's past.",
+                    "💡 The sign relates to the 1920s and 30s ballroom dancing craze that happened here.",
+                    "💡 The original sign says 'Dance Hall' and advertises the former ballroom."
+                ],
+                riddle: "Gross but amazing! Head downstairs to find the large indoor atrium filled with artwork and sculptures. This open space below street level is perfect for your next discovery.",
+                nextRiddle: "Groovy! While you're in this same atrium, look around for the sea creature and forest dweller who keep watch. Name either of these large guardians created by local artists."
+            },
+            {
+                id: 9,
+                clue: "Terrific! Look around this Economy Market atrium! Two large sculptures by local artists guard this space - a sea creature from 2001 and a mysterious forest dweller from 1978. Name either of these impressive sculptures.",
+                answers: ['squid', 'sasquatch', 'bigfoot'],
+                hints: [
+                    "💡 Look up toward the ceiling and in the corners for these large artistic guardians.",
+                    "💡 One lives in the ocean and has tentacles, the other is a legendary Pacific Northwest creature.",
+                    "💡 The sculptures are a Squid (by Pat Wickline) and a Sasquatch (by Rich Beyer)."
+                ],
+                riddle: "Groovy! While you're in this same atrium, look around for the sea creature and forest dweller who keep watch. Name either of these large guardians created by local artists.",
+                nextRiddle: "Marvelous! Still in this building, seek out the women's art collective that has been here for 60 years! Born from activism to save the market, this gallery continues their mission. What year did this historic art stall open?"
+            },
+            {
+                id: 10,
+                clue: "Amazing! You've found the Art Stall Gallery! This women-owned artist collective has an incredible story - they opened in 1964 to help save Pike Place Market from demolition. For 60 years, they've been creating and selling art while supporting the 'Keep the Market' campaign. What year did this pioneering gallery first open?",
+                answers: ['1964'],
+                hints: [
+                    "💡 Look for information about when this gallery was established to support the market preservation.",
+                    "💡 They opened during the 1960s to help with the 'Keep the Market' campaign.",
+                    "💡 The Art Stall Gallery first opened in 1964 to support saving Pike Place Market."
+                ],
+                riddle: "Marvelous! Still in this building, seek out the women's art collective that has been here for 60 years! Born from activism to save the market, this gallery continues their mission. What year did this historic art stall open?",
+                nextRiddle: "Inspiring! Now head back toward the famous clock area to find a sign from a hotel with a French name that once had a scandalous reputation. This painted reminder sits near the timekeeper."
+            },
+            {
+                id: 11,
+                clue: "Outstanding! You're looking for a piece of Pike Place Market's colorful past! There's an original painted hotel sign from a building that once had a rather scandalous reputation. This French-named hotel sign is near the famous clock. What name appears on this historic sign?",
+                answers: ['lasalle', 'la salle', 'lasalle hotel', 'la salle hotel'],
+                hints: [
+                    "💡 Look around the area near the Public Market Center Clock & Sign for vintage painted signage.",
+                    "💡 This hotel name is French and means 'the room' - it has a colorful past as a former brothel.",
+                    "💡 The historic painted sign reads 'LaSalle Hotel' and dates back to the early 1900s."
+                ],
+                riddle: "Inspiring! Now head back toward the famous clock area to find a sign from a hotel with a French name that once had a scandalous reputation. This painted reminder sits near the timekeeper.",
+                nextRiddle: "Intriguing history! Time to meet Rachel's cousin who moved to a plaza with a water view. Follow the bronze trail that honors the donors who made her new home possible."
+            },
+            {
+                id: 12,
+                clue: "Spectacular! You've found Billie the Piggy Bank on the MarketFront Plaza! Billie is Rachel's cousin and moved here in 2016. Look around at the bronze hoofprints that lead to Billie - these honor the donors who helped create this plaza. Count approximately how many bronze hoofprints you can see in the immediate area.",
+                answers: ['5', 'six', '6', 'seven', '7', 'eight', '8', 'many', 'several', 'multiple'],
+                hints: [
+                    "💡 Look down at the ground around Billie for bronze hoofprint markers embedded in the walkway.",
+                    "💡 Don't try to count every single one - just give an approximate number of what you can see nearby.",
+                    "💡 There are several bronze hoofprints visible in the immediate area around Billie - anywhere from 5-8 is correct."
+                ],
+                riddle: "Intriguing history! Time to meet Rachel's cousin who moved to a plaza with a water view. Follow the bronze trail that honors the donors who made her new home possible.",
+                nextRiddle: "Spectacular! While you're here on this waterfront plaza, take in the amazing view! Look out toward the water - what large body of water can you see from this MarketFront overlook?"
+            },
+            {
+                id: 13,
+                clue: "Perfect! You're standing on the MarketFront Plaza with one of Seattle's best views! From this overlook, you can see across the water to the Olympic Mountains and islands. What is the name of the large body of water that stretches out before you?",
+                answers: ['puget sound', 'elliott bay', 'puget', 'elliott'],
+                hints: [
+                    "💡 Look for any signs or plaques that mention the name of this body of water.",
+                    "💡 This is the same body of water that the Seattle waterfront sits on - it's either the specific bay or the larger sound.",
+                    "💡 You're looking at Elliott Bay, which is part of the larger Puget Sound."
+                ],
+                riddle: "Spectacular! While you're here on this waterfront plaza, take in the amazing view! Look out toward the water - what large body of water can you see from this MarketFront overlook?",
+                nextRiddle: "Outstanding work, team! Your final challenge: return to where your adventure began. Head back up to the playground where this quest started, and prepare to celebrate your success!"
+            },
+            {
+                id: 14,
+                clue: "Perfect! Welcome back to where it all began! You've completed an amazing journey through Pike Place Market's history, art, and culture. Look around the Overlook Playground area - this is where your adventure started and where it triumphantly ends! Type 'complete' to finish your quest.",
+                answers: ['playground', 'overlook', 'overlook playground', 'finished', 'complete', 'done', 'end'],
+                hints: [
+                    "💡 You're looking to confirm you've returned to the starting point of your quest.",
+                    "💡 This is the playground area with views overlooking the market below.",
+                    "💡 Simply type 'complete' or 'playground' to finish your amazing adventure!"
+                ],
+                riddle: "Outstanding work, team! Your final challenge: return to where your adventure began. Head back up to the playground where this quest started, and prepare to celebrate your success!",
+                nextRiddle: ""
+            }
+        ];
+
+        // Game state
+        let gameState = {
+            currentLocation: 1,
+            totalLocations: 14,
+            totalPoints: 0,
+            currentPoints: 100,
+            hintsUsed: 0,
+            locationHintsUsed: 0,
+            locationPoints: [],
+            foundLocation: false
+        };
+
+        // Load saved progress
+        function loadProgress() {
+            const saved = localStorage.getItem('pikeMarketQuest');
+            if (saved) {
+                gameState = { ...gameState, ...JSON.parse(saved) };
+                loadCurrentLocation();
+                updateDisplay();
+            }
+        }
+
+        // Save progress
+        function saveProgress() {
+            localStorage.setItem('pikeMarketQuest', JSON.stringify(gameState));
+        }
+
+        // Load current location content
+        function loadCurrentLocation() {
+            const location = locations[gameState.currentLocation - 1];
+            if (!location) return;
+
+            document.getElementById('riddleText').textContent = location.riddle;
+            document.getElementById('clueText').textContent = location.clue;
+            
+            // Show/hide sections based on whether location was found
+            if (gameState.foundLocation) {
+                document.getElementById('phaseTitle').textContent = "🎯 Solve the Challenge";
+                document.getElementById('navigationSection').style.display = 'none';
+                document.getElementById('clueSection').style.display = 'block';
+            } else {
+                document.getElementById('phaseTitle').textContent = "🧩 Find Your Destination";
+                document.getElementById('navigationSection').style.display = 'block';
+                document.getElementById('clueSection').style.display = 'none';
+            }
+            
+            // Reset hints for current location
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('hint' + i).style.display = 'none';
+                document.getElementById('hint' + i + 'Btn').disabled = i > 1;
+            }
+            
+            // Reset answer input
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').disabled = false;
+            document.querySelector('.submit-button').disabled = false;
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextLocation').style.display = 'none';
+            
+            // Reset current location points and hints
+            if (!gameState.foundLocation) {
+                gameState.currentPoints = 100;
+                gameState.locationHintsUsed = 0;
+            }
+        }
+
+        // Update display elements
+        function updateDisplay() {
+            document.getElementById('currentLocation').textContent = gameState.currentLocation;
+            document.getElementById('totalLocations').textContent = gameState.totalLocations;
+            document.getElementById('totalPoints').textContent = gameState.totalPoints;
+            document.getElementById('currentPoints').textContent = gameState.currentPoints;
+            document.getElementById('hintsUsed').textContent = gameState.hintsUsed;
+            
+            // Update progress bar
+            const progress = ((gameState.currentLocation - 1) / gameState.totalLocations) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Found location function
+        function foundLocation() {
+            gameState.foundLocation = true;
+            document.getElementById('phaseTitle').textContent = "🎯 Solve the Challenge";
+            document.getElementById('navigationSection').style.display = 'none';
+            document.getElementById('clueSection').style.display = 'block';
+            saveProgress();
+        }
+
+        // Show hint function
+        function showHint(hintNumber) {
+            const location = locations[gameState.currentLocation - 1];
+            if (!location || gameState.locationHintsUsed >= hintNumber) return;
+
+            gameState.locationHintsUsed = hintNumber;
+            gameState.currentPoints = Math.max(25, 100 - (hintNumber * 25));
+            gameState.hintsUsed++;
+            
+            // Show the hint
+            document.getElementById('hint' + hintNumber).innerHTML = location.hints[hintNumber - 1];
+            document.getElementById('hint' + hintNumber).style.display = 'block';
+            
+            // Disable the used hint button
+            document.getElementById('hint' + hintNumber + 'Btn').disabled = true;
+            
+            // Enable next hint button if available
+            if (hintNumber < 3) {
+                document.getElementById('hint' + (hintNumber + 1) + 'Btn').disabled = false;
+            }
+            
+            updateDisplay();
+            saveProgress();
+        }
+
+        // Check answer function
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+            const location = locations[gameState.currentLocation - 1];
+            const feedback = document.getElementById('feedback');
+            
+            if (!userAnswer) {
+                feedback.className = 'feedback error';
+                feedback.innerHTML = '<strong>❌ Please enter an answer!</strong>';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            // Check if answer is correct (flexible matching)
+            const isCorrect = location.answers.some(answer => {
+                const cleanAnswer = answer.toLowerCase().replace(/[^\w\s]/g, '').trim();
+                const cleanUserAnswer = userAnswer.replace(/[^\w\s]/g, '').trim();
+                return cleanUserAnswer === cleanAnswer || 
+                       cleanUserAnswer.includes(cleanAnswer) ||
+                       cleanAnswer.includes(cleanUserAnswer);
+            });
+            
+            if (isCorrect) {
+                gameState.totalPoints += gameState.currentPoints;
+                gameState.locationPoints.push(gameState.currentPoints);
+                
+                feedback.className = 'feedback success';
+                feedback.innerHTML = `
+                    <strong>🎉 Correct!</strong><br>
+                    You earned ${gameState.currentPoints} points!
+                `;
+                feedback.style.display = 'block';
+                
+                document.getElementById('pointsEarned').textContent = 
+                    `You earned ${gameState.currentPoints} points for this challenge!`;
+                
+                // Show next riddle if not the last location
+                if (gameState.currentLocation < gameState.totalLocations) {
+                    document.getElementById('nextRiddle').innerHTML = `
+                        <h4>🧩 Next Challenge:</h4>
+                        <p style="font-style: italic; margin-top: 10px; color: #f7f5f3;">${location.nextRiddle}</p>
+                    `;
+                    document.getElementById('nextLocation').style.display = 'block';
+                } else {
+                    // Final location completed - show completion
+                    showCompletionScreen();
+                    return;
+                }
+                
+                // Disable answer input
+                document.getElementById('answerInput').disabled = true;
+                document.querySelector('.submit-button').disabled = true;
+                
+                updateDisplay();
+                saveProgress();
+                
+            } else {
+                feedback.className = 'feedback error';
+                feedback.innerHTML = `
+                    <strong>❌ Not quite right.</strong><br>
+                    Try again! Look more carefully around this location.
+                `;
+                feedback.style.display = 'block';
+                
+                // Clear the input for another try
+                document.getElementById('answerInput').value = '';
+            }
+        }
+
+        // Next location function
+        function nextLocation() {
+            gameState.currentLocation++;
+            gameState.foundLocation = false;  // Reset for next location
+            if (gameState.currentLocation <= gameState.totalLocations) {
+                loadCurrentLocation();
+                updateDisplay();
+                saveProgress();
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // Show completion screen
+        function showCompletionScreen() {
+            document.querySelector('.main-content').innerHTML = `
+                <div class="completion-screen" style="display: block;">
+                    <h2>🏆 Quest Complete!</h2>
+                    <p>Congratulations! You've successfully completed the Pike Place Market Adventure Quest!</p>
+                    <div class="final-score">${gameState.totalPoints}</div>
+                    <p>Total Points Earned (out of ${gameState.totalLocations * 100})</p>
+                    <div class="score-breakdown">
+                        <h4>Score Breakdown:</h4>
+                        ${gameState.locationPoints.map((points, index) => 
+                            `<p>Challenge ${index + 1}: ${points} points</p>`
+                        ).join('')}
+                        <hr>
+                        <p><strong>Total Hints Used: ${gameState.hintsUsed}</strong></p>
+                        <p><strong>Average Score: ${Math.round(gameState.totalPoints / gameState.totalLocations)} points per challenge</strong></p>
+                        <p><strong>Completion Rate: ${Math.round((gameState.totalPoints / (gameState.totalLocations * 100)) * 100)}%</strong></p>
+                    </div>
+                    <button class="reset-button" onclick="resetGame()">Start New Quest</button>
+                    
+                    <div class="problem-report" style="margin-top: 30px;">
+                        <p>How was your adventure? Share your experience!</p>
+                        <button class="report-button" onclick="shareFeedback()">Share Feedback</button>
+                    </div>
+                </div>
+            `;
+            
+            // Update progress bar to 100%
+            document.getElementById('progressFill').style.width = '100%';
+        }
+
+        // Report problem function
+        function reportProblem() {
+            const issue = prompt('What problem are you experiencing? (This would normally send feedback to the organizers)');
+            if (issue) {
+                alert('Thank you for the feedback! In the full version, this would alert the organizers: ' + issue);
+            }
+        }
+
+        // Share feedback function
+        function shareFeedback() {
+            const feedback = prompt('How was your Pike Place Market adventure? Any suggestions for improvement?');
+            if (feedback) {
+                alert('Thank you for sharing! Your feedback helps make future quests even better: ' + feedback);
+            }
+        }
+
+        // Reset game function
+        function resetGame() {
+            if (confirm('Are you sure you want to start a new quest? This will erase your current progress.')) {
+                localStorage.removeItem('pikeMarketQuest');
+                location.reload();
+            }
+        }
+
+        // Allow Enter key to submit answer
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const answerInput = document.getElementById('answerInput');
+                if (answerInput && document.getElementById('clueSection').style.display !== 'none') {
+                    checkAnswer();
+                }
+            }
+        });
+
+        // Initialize the game
+        loadProgress();
+        updateDisplay();
+
+        // Add some visual feedback for mobile users
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, button');
+            inputs.forEach(input => {
+                input.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                input.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
